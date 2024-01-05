@@ -1,0 +1,70 @@
+version: '4.0'
+
+x-service-setup: &service-setup
+  build: ./app
+  volumes:
+    - ./app/:/home/app/web/
+    - sessions:/home/app/web/bots/sessions
+    - static:/home/app/web/static
+    - media:/home/app/web/media
+    - logs:/home/app/web/logs
+  env_file:
+    - ./.env
+
+services:
+  # Services.
+  web:
+    <<: *service-setup
+    container_name: web
+    command: gunicorn botnet.wsgi:application --bind 0.0.0.0:8000 --timeout 600 --workers 3
+    expose:
+      - 8000
+    depends_on:
+      - postgres
+      - redis
+
+  worker-default:
+    <<: *service-setup
+    command: python manage.py rqworker default
+    depends_on:
+      - web
+    deploy:
+      mode: replicated
+      replicas: 4
+
+  nginx:
+    container_name: nginx
+    build: ./nginx
+    volumes:
+      - static:/home/app/web/static
+      - media:/home/app/web/media
+    ports:
+      - 80:80
+    depends_on:
+      - web
+
+  # Databases.
+  postgres:
+    container_name: postgres
+    image: postgres:15
+    volumes:
+      - postgres:/var/lib/postgresql/data/
+    expose:
+      - 5432
+    env_file:
+      - ./.env
+
+  redis:
+    container_name: redis
+    image: redis
+    expose:
+      - 6379
+
+volumes:
+  postgres:
+  sessions:
+  static:
+  media:
+  logs:
+
+

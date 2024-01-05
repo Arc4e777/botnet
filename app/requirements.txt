@@ -1,0 +1,9 @@
+django==5.0b1
+requests
+psycopg2-binary
+gunicorn
+django_rq
+
+pyrogram
+tgcrypto
+uvloop

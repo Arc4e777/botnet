@@ -1,0 +1,14 @@
+{% extends "admin/change_form.html" %}
+{% load i18n %}
+
+{% block extrastyle %}
+{{ block.super }}
+{% endblock %}
+
+{% block submit_buttons_bottom %}
+<div class="submit-row">
+	<input type="submit" value="Проверить на валидность" class="default" name="_check-valid">
+
+	<a href="/admin/bots/userbot/{{request.resolver_match.kwargs.object_id}}/delete/" class="deletelink">Удалить</a>
+</div>
+{% endblock %}

@@ -1,0 +1,145 @@
+{% extends "admin/change_form.html" %}
+{% load i18n %}
+
+{% block extrahead %}
+{{ block.super }}
+<script src="https://unpkg.com/htmx.org@1.1.0"></script>
+{% endblock %}
+
+{% block extrastyle %}
+<script src='//cdnjs.cloudflare.com/ajax/libs/jquery/2.2.2/jquery.min.js'></script>
+<script src='//cdnjs.cloudflare.com/ajax/libs/markdown-it/8.1.0/markdown-it.min.js'></script>
+<script src='//cdnjs.cloudflare.com/ajax/libs/autosize.js/3.0.18/autosize.min.js'></script>
+<script src='//unpkg.com/@wmhilton/cli-parser@1.1.0'></script>
+<script src='//s.codepen.io/assets/libs/modernizr.js'></script>
+{{ block.super }}
+<style type="text/css">
+    .console {
+      position: initial;
+      font-family: monospace,monospace;
+      color: #fff;
+      width: calc(100% - 3em);
+      max-width: 100%;
+      max-height: 400px;
+      overflow-y: auto;
+      margin: 1em 1em;
+      padding-top: 0.5em;
+      padding-bottom: 0.5em;
+      background: rgba(0, 0, 0, 0.5);
+      border-radius: 0.5em;
+      box-shadow: 0 0.75em 3em rgba(50, 50, 50, 0.5);
+      z-index: 100;
+      line-height: 1.5;
+    }
+
+    .console-input {
+      font-family: monospace,monospace;
+      background-color: transparent;
+      border: none;
+      outline: none;
+      color: #fff;
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      appearance: none;
+      min-width: calc(100% - 2em);
+      resize: none;
+    }
+
+    .console-input:before {
+      content: '> ';
+      color: #FC3565;
+      vertical-align: top;
+    }
+
+    .output-cmd:before {
+      content: '> ';
+      color: #FC3565;
+      vertical-align: top;
+    }
+    .output-text:before {
+      content: '> ';
+      color: #5F8787;
+      font-weight: 600 !important;
+      vertical-align: top;
+    }
+
+    .output-text,
+    .output-cmd {
+      width: 100%;
+      display: block;
+    }
+
+    .console-inner {
+      padding: 0.3em 1.1em;
+    }
+
+    .output-text,
+    .output-cmd {
+      display: block;
+      white-space: pre;
+    }
+
+    #outputs div {
+      opacity: 0.85;
+    }
+
+    #outputs div div {
+      color: #46f01d;
+      opacity: 0.8;
+      text-decoration: none;
+    }
+
+    #outputs a {
+      color: #46f01d;
+      opacity: 0.8;
+      text-decoration: underline;
+    }
+
+    .console-inner .output-text#ready {
+      color: #3df5b8;
+      font-style: italic;
+      opacity: 0.75;
+    }
+</style>
+{% endblock %}
+
+{% block inline_field_sets %}
+{{ block.super }}
+{% if task.in_process %}
+<div class='console'>
+  <div class='console-inner'>
+    <div id="outputs" hx-get="/control/log-list/{{task.id}}/" hx-trigger="load, every 2s">
+    </div>
+    <div class='output-cmd'><textarea autofocus class='console-input'></textarea></div>
+  </div>
+</div>
+{% endif %}
+
+<script type="text/javascript">
+  $("body").on('DOMSubtreeModified', "#outputs", function() {
+      var consoleDiv = $(".console")[0];
+      consoleDiv.scrollTop = consoleDiv.scrollHeight;
+  });
+</script>
+{% endblock %}
+
+{% block submit_buttons_bottom %}
+<div class="submit-row">
+	{% if not task.in_process  %}
+	<input type="submit" value="Сохранить" class="default" name="_continue">
+	<input type="submit" value="Запустить" class="default" name="_start">
+	{% else %}
+	<input type="submit" value="Остановить" class="default" name="_stop" style="background-color: rgb(186, 33, 33);;">
+	{% endif %}
+
+	{% if task and not task.in_process %}
+	<a href="/admin/control/task/{{request.resolver_match.kwargs.object_id}}/delete/" class="deletelink">Удалить</a>
+	{% endif %}
+</div>
+{% endblock %}
+
+
+

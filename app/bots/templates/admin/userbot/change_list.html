@@ -1,0 +1,15 @@
+{% extends "admin/change_list.html" %}
+{% load static %}
+
+{% block extrahead %}
+{{ block.super }}
+{% endblock %}
+
+{% block object-tools-items %}
+<li><a href="/admin/bots/userbot/add/?upload=1" class="addlink">Загрузить из архива</a></li>
+{{ block.super }}
+{% endblock %}
+
+
+
+
